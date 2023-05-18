@@ -16,12 +16,8 @@ import {
 } from '@chakra-ui/react'
 import { ReactElement, ReactNode, useRef } from 'react'
 import { AiFillHome, AiOutlineMenu } from 'react-icons/ai'
-import { BsListUl, BsMoonFill, BsSunFill } from 'react-icons/bs'
+import { BsMoonFill, BsSunFill } from 'react-icons/bs'
 import { useNavigate } from 'react-router-dom'
-
-import { ModHeaderBtnLink } from '~components/ModHeaderBtnLink'
-
-import { sortedModHook } from '../hooks/sortedModHook'
 
 type Props = {
     children: unknown
@@ -36,7 +32,6 @@ export const Header = ({ children, title, headerBtns, drawerBtns }: Props) => {
     const { colorMode, toggleColorMode } = useColorMode()
     const btnRef = useRef<HTMLButtonElement>(null)
     const navigate = useNavigate()
-    const { sortedMods } = sortedModHook()
 
     return (
         <>
@@ -62,24 +57,12 @@ export const Header = ({ children, title, headerBtns, drawerBtns }: Props) => {
                     <DrawerBody display="flex">
                         <Flex display="flex" direction="column" gap="2" width="100%">
                             <Button
-                                onClick={() => navigate('/')}
+                                onClick={() => navigate(-1)}
                                 w="full"
                                 leftIcon={<AiFillHome />}
                                 justifyContent="flex-start"
                             >
                                 Home
-                            </Button>
-                            {sortedMods.map((mod: Mod, index: number) => (
-                                <ModHeaderBtnLink mod={mod} key={`${mod.name}-${index}`} />
-                            ))}
-                            <Button
-                                onClick={() => navigate('/mods')}
-                                disabled={window.location.pathname === '/mods'}
-                                w="full"
-                                leftIcon={<BsListUl />}
-                                justifyContent="flex-start"
-                            >
-                                Add an Application
                             </Button>
                             <Button
                                 onClick={toggleColorMode}

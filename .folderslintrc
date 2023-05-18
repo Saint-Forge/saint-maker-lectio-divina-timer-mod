@@ -1,15 +1,15 @@
+
 {
-  "root": "src", 
-  "rules": [
-    "components/*",
-    "constants",
-    "hooks",
-    "mods",
-    "pages/*",
-    "redux",
-    "redux/slice",
-    "redux/slice/utils",
-    "styles",
-    "utils"
-   ]
+    "root": "src",
+    "rules": [
+      "components/*",
+      "constants",
+      "mods",
+      "pages/*",
+      "redux",
+      "redux/slice",
+      "redux/slice/utils",
+      "tests",
+      "utils"
+    ]
 }
