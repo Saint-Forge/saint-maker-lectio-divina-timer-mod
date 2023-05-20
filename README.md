@@ -1,10 +1,10 @@
 
-# New SaintMaker Mod
+# Lectio Divina Timer Mod
 
 <details><summary>Description</summary>
 <p>
 
-The description of your new mod.
+A simple timer system for saying Lectio Divina.
 
 </p>
 </details>
