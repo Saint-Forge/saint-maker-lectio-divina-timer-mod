@@ -1,5 +1,5 @@
 import { Box, Button, Text, Input, Checkbox, Flex } from '@chakra-ui/react'
-import { RefObject, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import useSound from 'use-sound'
 
 import { Header } from '~components/Header'
@@ -7,20 +7,24 @@ import { ls } from '~utils/localStorage'
 
 import oldChurchBell from '/old-church-bell.wav'
 
-interface IDefaultDurations {
+interface ITimerDefaults {
     lectioDefaultDuration: number
+    lectioTimerDisabled: boolean
     meditatioDefaultDuration: number
     oratioDefaultDuration: number
     contemplatioDefaultDuration: number
+    contemplatioTimerDisabled: boolean
 }
 
 const defaultDuration = 5
 
 const defaultDurations = {
     lectioDefaultDuration: defaultDuration,
+    lectioTimerDisabled: false,
     meditatioDefaultDuration: defaultDuration,
     oratioDefaultDuration: defaultDuration,
     contemplatioDefaultDuration: defaultDuration,
+    contemplatioTimerDisabled: false,
 }
 const LS_DEFAULT_DURATIONS_KEY = 'DEFAULT_DURATIONS'
 
@@ -33,7 +37,7 @@ export const App = (): JSX.Element => {
     const [playBell] = useSound(oldChurchBell)
     const [isLectioTimerDisabled, setIsLectioTimerDisabled] = useState(false)
     const [isContemplatioDisabled, setIsContemplatioDisabled] = useState(false)
-    const [timerDefaults, setTimerDefaults] = useState<IDefaultDurations | undefined>()
+    const [timerDefaults, setTimerDefaults] = useState<ITimerDefaults | undefined>()
     const segmentTimerCounts = useRef<number[]>([])
 
     const getDefaultDurations = () => JSON.parse(ls.get(LS_DEFAULT_DURATIONS_KEY) ?? JSON.stringify(defaultDurations))
@@ -41,16 +45,30 @@ export const App = (): JSX.Element => {
     const getTimerDefaults = () => {
         const fetchedTimerDefaults = getDefaultDurations()
         setTimerDefaults(fetchedTimerDefaults)
+        setIsLectioTimerDisabled(fetchedTimerDefaults.lectioTimerDisabled)
+        setIsContemplatioDisabled(fetchedTimerDefaults.contemplatioTimerDisabled)
     }
 
     useEffect(() => {
         getTimerDefaults()
     }, [])
 
-    const updateDefaults = (key: string, element: RefObject<HTMLInputElement>) => {
+    const updateDefaults = (key: string, value?: string | number | boolean) => {
         const fetchedTimerDefaults = getDefaultDurations()
-        fetchedTimerDefaults[key] = element?.current?.value || defaultDuration
+        fetchedTimerDefaults[key] = value
         ls.set(LS_DEFAULT_DURATIONS_KEY, JSON.stringify(fetchedTimerDefaults))
+    }
+
+    const toggleLectioTimer = () => {
+        const timerDisabled = !isLectioTimerDisabled
+        updateDefaults('lectioTimerDisabled', timerDisabled)
+        setIsLectioTimerDisabled(timerDisabled)
+    }
+
+    const toggleContemplatioTimer = () => {
+        const timerDisabled = !isContemplatioDisabled
+        updateDefaults('contemplatioTimerDisabled', timerDisabled)
+        setIsContemplatioDisabled(timerDisabled)
     }
 
     const getTimers = () => {
@@ -100,15 +118,16 @@ export const App = (): JSX.Element => {
                                         defaultValue={timerDefaults.lectioDefaultDuration}
                                         placeholder={'Input the number of minutes'}
                                         ref={lectioTimerInput}
-                                        onChange={() => updateDefaults('lectioDefaultDuration', lectioTimerInput)}
+                                        onChange={() =>
+                                            updateDefaults(
+                                                'lectioDefaultDuration',
+                                                lectioTimerInput?.current?.value || defaultDuration,
+                                            )
+                                        }
                                     />
                                 </>
                             )}
-                            <Checkbox
-                                mt="16px"
-                                isChecked={isLectioTimerDisabled}
-                                onChange={() => setIsLectioTimerDisabled(!isLectioTimerDisabled)}
-                            >
+                            <Checkbox mt="16px" isChecked={isLectioTimerDisabled} onChange={() => toggleLectioTimer()}>
                                 {isLectioTimerDisabled ? 'En' : 'Dis'}able Lectio Timer
                             </Checkbox>
                             <Text mb="8px" mt="16px">
@@ -118,7 +137,12 @@ export const App = (): JSX.Element => {
                                 defaultValue={Number(timerDefaults.meditatioDefaultDuration)}
                                 placeholder={'Input the number of minutes'}
                                 ref={meditatioTimerInput}
-                                onChange={() => updateDefaults('meditatioDefaultDuration', meditatioTimerInput)}
+                                onChange={() =>
+                                    updateDefaults(
+                                        'meditatioDefaultDuration',
+                                        meditatioTimerInput?.current?.value || defaultDuration,
+                                    )
+                                }
                             />
                             <Text mb="8px" mt="16px">
                                 Oratio (minutes)
@@ -127,7 +151,12 @@ export const App = (): JSX.Element => {
                                 defaultValue={timerDefaults.oratioDefaultDuration}
                                 placeholder={'Input the number of minutes'}
                                 ref={oratioTimerInput}
-                                onChange={() => updateDefaults('oratioDefaultDuration', oratioTimerInput)}
+                                onChange={() =>
+                                    updateDefaults(
+                                        'oratioDefaultDuration',
+                                        oratioTimerInput?.current?.value || defaultDuration,
+                                    )
+                                }
                             />
                             {!isContemplatioDisabled && (
                                 <>
@@ -139,7 +168,10 @@ export const App = (): JSX.Element => {
                                         placeholder={'Input the number of minutes'}
                                         ref={contemplatioTimerInput}
                                         onChange={() =>
-                                            updateDefaults('contemplatioDefaultDuration', contemplatioTimerInput)
+                                            updateDefaults(
+                                                'contemplatioDefaultDuration',
+                                                contemplatioTimerInput?.current?.value || defaultDuration,
+                                            )
                                         }
                                     />
                                 </>
@@ -147,7 +179,7 @@ export const App = (): JSX.Element => {
                             <Checkbox
                                 mt="16px"
                                 isChecked={isContemplatioDisabled}
-                                onChange={() => setIsContemplatioDisabled(!isContemplatioDisabled)}
+                                onChange={() => toggleContemplatioTimer()}
                             >
                                 {isContemplatioDisabled ? 'En' : 'Dis'}able Contemplatio Timer
                             </Checkbox>
