@@ -39,6 +39,7 @@ export const App = (): JSX.Element => {
     const [isContemplatioDisabled, setIsContemplatioDisabled] = useState(false)
     const [timerDefaults, setTimerDefaults] = useState<ITimerDefaults | undefined>()
     const segmentTimerCounts = useRef<number[]>([])
+    const timerIds = useRef<number[]>([])
 
     const getDefaultDurations = () => JSON.parse(ls.get(LS_DEFAULT_DURATIONS_KEY) ?? JSON.stringify(defaultDurations))
 
@@ -84,13 +85,20 @@ export const App = (): JSX.Element => {
         let cumulativeTimerCount = 0
         segmentTimerCounts.current.forEach((timerCount, index) => {
             const timerMinutes = 1000 * 60 * timerCount
-            setTimeout(() => {
+            const timeoutId = setTimeout(() => {
                 playBell()
                 if (index + 1 === segmentTimerCounts.current.length) setIsTimerActive(false)
             }, timerMinutes + cumulativeTimerCount)
+            timerIds.current.push(timeoutId)
             cumulativeTimerCount += timerMinutes
         })
         setIsTimerActive(true)
+    }
+
+    const clearTimers = () => {
+        setIsTimerActive(false)
+        timerIds.current.map((id) => clearTimeout(id))
+        timerIds.current = []
     }
 
     if (timerDefaults === undefined) {
@@ -184,11 +192,9 @@ export const App = (): JSX.Element => {
                                 {isContemplatioDisabled ? 'En' : 'Dis'}able Contemplatio Timer
                             </Checkbox>
                             <Box display="flex" justifyContent="flex-end">
-                                {isTimerActive ? (
-                                    <Button onClick={() => setIsTimerActive(false)}>Reset</Button>
-                                ) : (
-                                    <Button onClick={startTimers}>Start</Button>
-                                )}
+                                <Button onClick={isTimerActive ? clearTimers : startTimers}>
+                                    {isTimerActive ? 'Reset' : 'Start'}
+                                </Button>
                             </Box>
                         </Flex>
                     </Flex>
